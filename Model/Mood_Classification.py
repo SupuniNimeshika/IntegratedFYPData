@@ -9,7 +9,8 @@ from sklearn.metrics import classification_report
 
 
 def data_predict(text):
-    fullCorpus = pd.read_csv('../new.tsv', sep='|', header=None)
+    print('---------------------'+text+'-------------------')
+    fullCorpus = pd.read_csv('data/final.tsv', sep='|', header=None)
     fullCorpus.columns = ['label', 'body_text']
     fullCorpus.head()
 
@@ -24,19 +25,50 @@ def data_predict(text):
     print("Number of null in label: {}".format(fullCorpus['label'].isnull().sum()))
     print("Number of null in label: {}".format(fullCorpus['body_text'].isnull().sum()))
 
+    def convert_to_lowercase(text):
+        input_str = text
+        input_str = input_str.lower()
+        return input_str
+
+    fullCorpus['body_text_lower'] = fullCorpus['body_text'].apply(lambda x: convert_to_lowercase(x))
+
+    # print seperate file for lowercase output
+    print('----------------------------Print in the punctuation.txt-----------------------------------------')
+    file = open('pre-process_output/lowercase.txt', 'w',encoding="utf-8")
+    lowercased = fullCorpus['body_text_lower']
+    for index, val in lowercased.iteritems():
+        line = str(index) + '\t' + str(val)
+        file.write(line + '\n')
+    file.close()
+
+    def remove_numbers(text):
+        result = re.sub(r'\d+', '', text)
+        return result
+
+    fullCorpus['body_text_no_numbers'] = fullCorpus['body_text_lower'].apply(lambda x: remove_numbers(x))
+    # print('finished')
+
+    # print seperate file for without number output
+    print('----------------------------Print in the no_number.txt-----------------------------------------')
+    file = open('pre-process_output/no_numbers.txt', 'w',encoding="utf-8")
+    no_numbers = fullCorpus['body_text_no_numbers']
+    for index, val in no_numbers.iteritems():
+        line = str(index) + '\t' + str(val)
+        file.write(line + '\n')
+    file.close()
 
     # remove punctuation
     string.punctuation
     def remove_punct(text):
         text_nopunct = "".join([char for char in text if char not in string.punctuation])
         return text_nopunct
-    fullCorpus['body_text_clean'] = fullCorpus['body_text'].apply(lambda x: remove_punct(x))
+    fullCorpus['body_text_no_punctuation'] = fullCorpus['body_text_no_numbers'].apply(lambda x: remove_punct(x))
     fullCorpus.head(25)
 
     # print seperate file for remove punctuation output
     print('----------------------------Print in the punctuation.txt-----------------------------------------')
-    file = open('punctuation.txt', 'w')
-    punctuationed = fullCorpus['body_text_clean']
+    file = open('pre-process_output/no_punctuation.txt', 'w',encoding="utf-8")
+    punctuationed = fullCorpus['body_text_no_punctuation']
     for index, val in punctuationed.iteritems():
         line = str(index)+'\t'+str(val)
         file.write(line+'\n')
@@ -47,12 +79,12 @@ def data_predict(text):
     def tokenize(text):
         tokens = re.split('\W+', text)
         return tokens
-    fullCorpus['body_text_tokenized'] = fullCorpus['body_text_clean'].apply(lambda x: tokenize(x.lower()))
+    fullCorpus['body_text_tokenized'] = fullCorpus['body_text_no_punctuation'].apply(lambda x: tokenize(x.lower()))
     fullCorpus.head()
 
     # print seperate file for tokenize output
     print('----------------------------Print in the tokenize.txt-----------------------------------------')
-    file = open('tokenize.txt', 'w')
+    file = open('pre-process_output/tokenize.txt', 'w',encoding="utf-8")
     tokenized = fullCorpus['body_text_tokenized']
     for index, val in tokenized.iteritems():
         line = str(index)+'\t'+str(val)
@@ -63,6 +95,9 @@ def data_predict(text):
     # stop word
     stopword = nltk.corpus.stopwords.words('english')
     def remove_stopwords(tokenized_list):
+        # for word in tokenized_list:
+        #     if word not in stopword:
+        #         print(word)
         text = [word for word in tokenized_list if word not in stopword]
         return text
     fullCorpus['body_text_nostop'] = fullCorpus['body_text_tokenized'].apply(lambda x: remove_stopwords(x))
@@ -70,7 +105,7 @@ def data_predict(text):
 
     # print seperate file for remove stop word output
     print('----------------------------Print in the nonstop.txt-----------------------------------------')
-    file = open('nostop.txt', 'w')
+    file = open('pre-process_output/nostop.txt', 'w',encoding="utf-8")
     nostoped = fullCorpus['body_text_nostop']
     for index, val in nostoped.iteritems():
         line = str(index)+'\t'+str(val)
@@ -95,7 +130,7 @@ def data_predict(text):
 
     # print seperate file for lematization output
     print('----------------------------Print in the cleaned.txt-----------------------------------------')
-    file = open('cleaned.txt', 'w')
+    file = open('pre-process_output/lemmatized.txt', 'w',encoding="utf-8")
     cleaned=fullCorpus['body_text_lemmatized']
     for index, val in cleaned.iteritems():
         line = str(index)+'\t'+val
@@ -104,10 +139,10 @@ def data_predict(text):
 
 
     # separate training and testing data
-    trainData = fullCorpus['body_text_lemmatized'][:350]
-    testData = fullCorpus['body_text_lemmatized'][350:]
-    train_labels = fullCorpus['label'][:350]
-    test_labels = fullCorpus['label'][350:]
+    trainData = fullCorpus['body_text_lemmatized'][:1500]
+    testData = fullCorpus['body_text_lemmatized'][1500:]
+    train_labels = fullCorpus['label'][:1500]
+    test_labels = fullCorpus['label'][1500:]
 
     # print train data and test data
     print("Train data count:\n", train_labels.value_counts())
@@ -210,4 +245,4 @@ def data_predict(text):
     print (classification_report(test_labels, full_model_result))
 
 if __name__ == '__main__':
-    data_predict('Happiness will vary')
+    data_predict('Sadness is my life')

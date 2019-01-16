@@ -53,12 +53,15 @@ def data_predict(text):
 
     # print seperate file for tokenize output
     print('----------------------------Print in the tokenize.txt-----------------------------------------')
-    file = open('tokenize.txt', 'w')
+    file = open('pre-process_output/tokenize.txt', 'w')
     tokenized = fullCorpus['body_text_tokenized']
     for index, val in tokenized.iteritems():
         line = str(index)+'\t'+str(val)
         file.write(line+'\n')
     file.close()
+
+
+
 
 
     # stop word
@@ -69,14 +72,17 @@ def data_predict(text):
     fullCorpus['body_text_nostop'] = fullCorpus['body_text_tokenized'].apply(lambda x: remove_stopwords(x))
     fullCorpus.head()
 
+
     # print seperate file for remove stop word output
     print('----------------------------Print in the nonstop.txt-----------------------------------------')
-    file = open('nostop.txt', 'w')
+    file = open('pre-process_output/nostop.txt', 'w')
     nostoped = fullCorpus['body_text_nostop']
     for index, val in nostoped.iteritems():
         line = str(index)+'\t'+str(val)
         file.write(line+'\n')
     file.close()
+
+
 
 
     #lemmatizing
@@ -96,12 +102,14 @@ def data_predict(text):
 
     # print seperate file for lematization output
     print('----------------------------Print in the cleaned.txt-----------------------------------------')
-    file = open('cleaned.txt', 'w')
+    file = open('pre-process_output/cleaned.txt', 'w')
     cleaned=fullCorpus['body_text_lemmatized']
     for index, val in cleaned.iteritems():
         line = str(index)+'\t'+val
         file.write(line+'\n')
     file.close()
+
+
 
 
     # separate training and testing data
