@@ -2,7 +2,8 @@ from flask import Flask, request, jsonify
 import json
 import requests
 import ocr as ocr
-import Mood_Classification as mc
+from Model import Mood_Classification as mc
+
 
 
 app = Flask(__name__)
